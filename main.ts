@@ -58,7 +58,6 @@ app.post('/protected',checkAuthentication,(req:any,res:any)=>{
   return res.send(req.userId)
 })
 app.get('/failure',(req:any,res:any)=>{
-  console.log(req.user)
   res.send('failure')
 })
 app.post('/register',async (req:any,res:any)=>{
@@ -84,11 +83,32 @@ app.post('/register',async (req:any,res:any)=>{
   res.json(authTokens)
 })
 app.post('/login',async(req:any,res:any)=>{
-  const { user } = await UserModel.authenticate()(req.body.username,req.body.password);
-  if(user){
-    const authTokens=createAuthTokens(user)
-    return res.json(authTokens)
+  try {
+    const auth  = await UserModel.authenticate()(req.body.username,req.body.password);
+    const authUser=auth.user
+    if(authUser){
+      const authTokens=createAuthTokens(authUser)
+      return res.json(authTokens)
+    }
+    console.log(auth.error)
+    if(auth.error){
+      console.log('i was hit')
+      if(auth.error.name=='IncorrectUsernameError'){
+        console.log('i was hit again')
+        return res.send('incorrect username')
+      }
+      else if(auth.error.name=='IncorrectPasswordError'){
+        return res.send('incorrect password')
+      }
+      else if(auth.error.name=='TooManyAttemptsError'){
+        return res.send('too many failed attempts')
+      }
+    }
+    return res.send('makosa ni yangu')
+  } catch (error:any) {
+    return res.status(500).send('server error:',error.message)
+    
   }
-  res.send('wrong password or username')
+ 
 })
 app.listen(3000,()=>console.log('running'))
