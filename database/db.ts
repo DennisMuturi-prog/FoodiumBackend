@@ -25,7 +25,7 @@ try {
 const db = client.db(DB_NAME);
 const users = db.collection("users");
 async function addNewUser(profile:GoogleProfile){
-    const newUser={refreshTokenVersion:1,...profile}
+    const newUser={refreshTokenVersion:1,username:profile.displayName,...profile}
     const user=await users.insertOne(newUser)
     return {_id:user.insertedId,...newUser}
 }
