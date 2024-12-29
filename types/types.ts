@@ -28,7 +28,16 @@ export interface GoogleProfile {
   export interface AuthenticatedUser extends GoogleProfile {
     _id:ObjectId
     refreshTokenVersion: number;
+    username:string
   }
   export interface AuthenticatedRequest extends Request {
     user?: AuthenticatedUser;
+  }
+  export interface PasswordUser {
+    _id: string;
+    username: string;
+    salt: string;
+    hash: string;
+    __v: number;
+    refreshTokenVersion:number
   }
