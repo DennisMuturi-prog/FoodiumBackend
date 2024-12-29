@@ -2,6 +2,7 @@ import passport from 'passport'
 import {Strategy as GoogleStrategy} from 'passport-google-oauth20'
 import {GoogleProfile} from "../types/types.ts";
 import { addNewUser, userExists } from "../database/db.ts";
+import { UserModel } from "../model/user.ts";
 
 passport.use(new GoogleStrategy({
     clientID: Deno.env.get("GOOGLE_CLIENT_ID"),
@@ -17,3 +18,5 @@ passport.use(new GoogleStrategy({
     done(null,user)
   }
 ));
+
+passport.use(UserModel.createStrategy());
