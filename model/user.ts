@@ -11,9 +11,17 @@ const User = new Schema({
         type: Number,
         required: true,
       },
+      attempts:{
+        type:Number,
+        required:true
+      },
+      last:{
+        type:Date,
+        required:true
+      }
 
 });
-User.plugin(passportLocalMongoose);
+User.plugin(passportLocalMongoose,{limitAttempts:true,maxAttempts:4,maxInterval:120000,unlockInterval:120000});
 const mongodb_uri=Deno.env.get('MONGODB_URI');
 if(mongodb_uri){
     mongoose.connect(mongodb_uri,{dbName:'authentication'});
