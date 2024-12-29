@@ -7,7 +7,10 @@
     "npm:jsonwebtoken@^9.0.2": "9.0.2",
     "npm:mongodb@5.6.0": "5.6.0",
     "npm:mongodb@^6.12.0": "6.12.0",
+    "npm:mongoose@^8.9.2": "8.9.2",
     "npm:passport-google-oauth20@2": "2.0.0",
+    "npm:passport-local-mongoose@8": "8.0.0",
+    "npm:passport-local@1": "1.0.0",
     "npm:passport@0.7": "0.7.0"
   },
   "jsr": {
@@ -68,7 +71,7 @@
       "dependencies": [
         "bytes",
         "content-type",
-        "debug",
+        "debug@2.6.9",
         "depd",
         "destroy",
         "http-errors",
@@ -125,6 +128,12 @@
       "integrity": "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==",
       "dependencies": [
         "ms@2.0.0"
+      ]
+    },
+    "debug@4.4.0": {
+      "integrity": "sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==",
+      "dependencies": [
+        "ms@2.1.3"
       ]
     },
     "depd@2.0.0": {
@@ -184,7 +193,7 @@
         "content-type",
         "cookie",
         "cookie-signature",
-        "debug",
+        "debug@2.6.9",
         "depd",
         "encodeurl@2.0.0",
         "escape-html",
@@ -213,7 +222,7 @@
     "finalhandler@1.3.1": {
       "integrity": "sha512-6BN9trH7bp3qvnrRyzsBz+g3lZxTNZTbVO2EV1CS0WIcDbawYVdYvGflME/9QP0h0pYlCDBCTjYa9nZzMDpyxQ==",
       "dependencies": [
-        "debug",
+        "debug@2.6.9",
         "encodeurl@2.0.0",
         "escape-html",
         "on-finished",
@@ -230,6 +239,9 @@
     },
     "function-bind@1.1.2": {
       "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA=="
+    },
+    "generaterr@1.5.0": {
+      "integrity": "sha512-JgcGRv2yUKeboLvvNrq9Bm90P4iJBu7/vd5wSLYqMG5GJ6SxZT46LAAkMfNhQ+EK3jzC+cRBm7P8aUWYyphgcQ=="
     },
     "get-intrinsic@1.2.6": {
       "integrity": "sha512-qxsEs+9A+u85HhllWJJFicJfPDhRmjzoYdl64aMWW9yRIJmSyxdn8IEkuIM530/7T+lv0TIHd8L6Q/ra0tEoeA==",
@@ -320,6 +332,9 @@
         "safe-buffer"
       ]
     },
+    "kareem@2.6.3": {
+      "integrity": "sha512-C3iHfuGUXK2u8/ipq9LfjFfXFxAZMQJJq7vLS45r3D9Y2xQ/m4S8zaR4zMLFWh9AsNPXmcFfUDhTEO8UIC/V6Q=="
+    },
     "lodash.includes@4.3.0": {
       "integrity": "sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w=="
     },
@@ -399,6 +414,27 @@
         "mongodb-connection-string-url@3.0.1"
       ]
     },
+    "mongoose@8.9.2": {
+      "integrity": "sha512-mLWynmZS1v8HTeMxyLhskQncS1SkrjW1eLNuFDYGQMQ/5QrFrxTLNwWXeCRZeKT2lXyaxW8bnJC9AKPT9jYMkw==",
+      "dependencies": [
+        "bson@6.10.1",
+        "kareem",
+        "mongodb@6.12.0",
+        "mpath",
+        "mquery",
+        "ms@2.1.3",
+        "sift"
+      ]
+    },
+    "mpath@0.9.0": {
+      "integrity": "sha512-ikJRQTk8hw5DEoFVxHG1Gn9T/xcjtdnOKIU1JTmGjZZlg9LST2mBLmcX3/ICIbgJydT2GOc15RnNy5mHmzfSew=="
+    },
+    "mquery@5.0.0": {
+      "integrity": "sha512-iQMncpmEK8R8ncT8HJGsGc9Dsp8xcgYMVSbs5jgnm1lFHTZqMJTUWTDx1LBO8+mK3tPNZWFLBghQEIOULSTHZg==",
+      "dependencies": [
+        "debug@4.4.0"
+      ]
+    },
     "ms@2.0.0": {
       "integrity": "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="
     },
@@ -427,6 +463,20 @@
       "integrity": "sha512-KSk6IJ15RoxuGq7D1UKK/8qKhNfzbLeLrG3gkLZ7p4A6DBCcv7xpyQwuXtWdpyR0+E0mwkpjY1VfPOhxQrKzdQ==",
       "dependencies": [
         "passport-oauth2"
+      ]
+    },
+    "passport-local-mongoose@8.0.0": {
+      "integrity": "sha512-jgfN/B0j11WT5f96QlL5EBvxbIwmzd+tbwPzG1Vk8hzDOF68jrch5M+NFvrHjWjb3lfAU0DkxKmNRT9BjFZysQ==",
+      "dependencies": [
+        "generaterr",
+        "passport-local",
+        "scmp"
+      ]
+    },
+    "passport-local@1.0.0": {
+      "integrity": "sha512-9wCE6qKznvf9mQYYbgJ3sVOHmCWoUNMVFoZzNoznmISbhnNNPhN9xfY3sLmScHMetEJeoY7CXwfhCe7argfQow==",
+      "dependencies": [
+        "passport-strategy"
       ]
     },
     "passport-oauth2@1.8.0": {
@@ -496,13 +546,16 @@
         "sparse-bitfield"
       ]
     },
+    "scmp@2.1.0": {
+      "integrity": "sha512-o/mRQGk9Rcer/jEEw/yw4mwo3EU/NvYvp577/Btqrym9Qy5/MdWGBqipbALgd2lrdWTJ5/gqDusxfnQBxOxT2Q=="
+    },
     "semver@7.6.3": {
       "integrity": "sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A=="
     },
     "send@0.19.0": {
       "integrity": "sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw==",
       "dependencies": [
-        "debug",
+        "debug@2.6.9",
         "depd",
         "destroy",
         "encodeurl@1.0.2",
@@ -564,6 +617,9 @@
         "side-channel-map",
         "side-channel-weakmap"
       ]
+    },
+    "sift@17.1.3": {
+      "integrity": "sha512-Rtlj66/b0ICeFzYTuNvX/EF1igRbbnGSvEyT79McoZa/DeGhMyC5pWKOEsZKnpkqtSeovd5FL/bjHWC3CIIvCQ=="
     },
     "smart-buffer@4.2.0": {
       "integrity": "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg=="
@@ -648,7 +704,10 @@
       "npm:express@^4.21.2",
       "npm:jsonwebtoken@^9.0.2",
       "npm:mongodb@^6.12.0",
+      "npm:mongoose@^8.9.2",
       "npm:passport-google-oauth20@2",
+      "npm:passport-local-mongoose@8",
+      "npm:passport-local@1",
       "npm:passport@0.7"
     ]
   }
