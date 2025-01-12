@@ -3,6 +3,9 @@ import MongoPaging from 'mongo-cursor-pagination'
 const MONGODB_URI = Deno.env.get("MONGODB_URI") || "";
 console.log(MONGODB_URI)
 const recipesdb = mongoist(`${MONGODB_URI}/recipes`);
+const kenyanRecipes=recipesdb.collection('Kenyan_recipes_combined')
+const worldwideRecipes=recipesdb.collection('sample_2M_recipes')
+
 
 type PaginatedResult={
     next:string,
@@ -13,7 +16,7 @@ type PaginatedResult={
 
 async function getPaginatedRecipes(collectionName:string,next?:string):Promise<PaginatedResult>{
     if (next){
-        const result = await MongoPaging.find(collectionName=='Worldwide'?recipesdb.collection('sample_2M_recipes'):recipesdb.collection('Kenyan_recipes_combined'), {
+        const result = await MongoPaging.find(collectionName=='Worldwide'?worldwideRecipes:kenyanRecipes, {
             limit: 5,
             next: next,
             sortAscending:true // This queries the next page
@@ -21,7 +24,7 @@ async function getPaginatedRecipes(collectionName:string,next?:string):Promise<P
         return result
     }
     else{
-        const result = await MongoPaging.find(collectionName=='Worldwide'?recipesdb.collection('sample_2M_recipes'):recipesdb.collection('Kenyan_recipes_combined'), {
+        const result = await MongoPaging.find(collectionName=='Worldwide'?worldwideRecipes:kenyanRecipes, {
             limit: 5,
             sortAscending:true
             });
