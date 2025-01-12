@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import {AuthenticatedUser, GoogleProfile} from "../types/types.ts";
 
+
 const MONGODB_URI = Deno.env.get("MONGODB_URI") || "";
 console.log(MONGODB_URI)
 const DB_NAME = Deno.env.get("DB_NAME") || "todo_db";
@@ -37,5 +38,6 @@ async function userExists(userId:string):Promise<AuthenticatedUser | null>{
     return user
 
 }
+
   
-export { db, users,userExists,addNewUser };
+export { db, users,userExists,addNewUser};
