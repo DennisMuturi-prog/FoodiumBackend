@@ -4,7 +4,8 @@ import './auth/auth.ts'
 import { checkAccessToken, checkRefreshToken, createAuthTokens } from "./auth/AuthTokens.ts";
 import { UserModel } from "./model/user.ts";
 import { MongoServerError } from "mongodb";
-// import { AuthenticatedRequest } from "./types/types.ts";
+import { getPaginatedRecipes } from "./database/recipes.ts";
+
 const app=express()
 async function checkAuthentication(req:any,res:any,next:any){
   if(req.body.accessToken && req.body.refreshToken){
@@ -82,7 +83,7 @@ app.post('/register',async (req:any,res:any)=>{
   const authTokens=createAuthTokens(user)
   res.json(authTokens)
 })
-app.post('/login',async(req:any,res:any)=>{
+app.post('/login',async(req:Request,res:Response)=>{
   try {
     const auth  = await UserModel.authenticate()(req.body.username,req.body.password);
     const authUser=auth.user
@@ -111,4 +112,20 @@ app.post('/login',async(req:any,res:any)=>{
   }
  
 })
+app.post('/recipes',async(req:Request,res:Response)=>{
+  try {
+    if(req.body.next){
+      const recipes=await getPaginatedRecipes(req.body.region?req.body.region:'Worldwide',req.body.next)
+      return res.json(recipes)
+    }
+    else{
+      const recipes=await getPaginatedRecipes(req.body.region?req.body.region:'Worldwide')
+      return res.json(recipes)
+    }  
+    
+  } catch (e:any) {
+    res.status(404).json({message:'error occurred fetching recipes'}) 
+  }
+})
+
 app.listen(3000,()=>console.log('running'))
