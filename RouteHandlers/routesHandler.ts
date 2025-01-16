@@ -2,12 +2,12 @@
 import {RequestHandler} from 'express'
 import { checkAccessToken,checkRefreshToken } from "../auth/AuthTokens.ts";
 
-interface RequestBody{
+interface CheckAuthRequestBody{
     accessToken:string;
     refreshToken:string
 }
-const checkAuthentication:RequestHandler=async (req,res,next)=>{
-    const tokens=<RequestBody>req.body
+export const checkAuthentication:RequestHandler=async (req,res,next)=>{
+    const tokens=<CheckAuthRequestBody>req.body
     if(!(tokens.accessToken&& tokens.refreshToken)){
         return res.status(404).send('you have no access,log in or register')
     }
@@ -16,7 +16,7 @@ const checkAuthentication:RequestHandler=async (req,res,next)=>{
     if(userData=='unauthorized'){
       const refreshedUser=await checkRefreshToken(tokens.refreshToken)
       if(refreshedUser=='unauthorized'){
-        return res.status(404).send('your credientials were revoked by primcipal user')
+        return res.status(404).send('your credientials were revoked by principal account')
       }
       else{
         req.newTokens=refreshedUser.newTokens
@@ -26,6 +26,7 @@ const checkAuthentication:RequestHandler=async (req,res,next)=>{
     }
     else{
       req.userId=userData.userId
+      console.log(userData)
       next()
     }
 
