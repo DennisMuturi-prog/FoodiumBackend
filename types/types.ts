@@ -34,7 +34,7 @@ export interface GoogleProfile {
     user?: AuthenticatedUser;
   }
   export interface PasswordUser {
-    _id: string;
+    id: string;
     username: string;
     salt: string;
     hash: string;
