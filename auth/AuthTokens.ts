@@ -1,6 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import {AuthenticatedUser, PasswordUser} from "../types/types.ts";
 import { userExists } from "../database/db.ts";
+import { retrieveUser } from "../sqlDB/mysqlDB.ts";
 export type RefreshTokenData = {
     userId: string;
     refreshTokenVersion?: number;
@@ -14,7 +15,7 @@ export const createAuthTokens = (
     user: AuthenticatedUser | PasswordUser
   ): { refreshToken: string; accessToken: string } => {
     const refreshToken = jwt.sign(
-      { userId: user._id, refreshTokenVersion: user.refreshTokenVersion },
+      { userId: user.id, refreshTokenVersion: user.refreshTokenVersion },
       Deno.env.get("REFRESH_TOKEN_SECRET")!,
       {
         expiresIn: "30d",
@@ -22,7 +23,7 @@ export const createAuthTokens = (
     );
   
     const accessToken = jwt.sign(
-      { userId: user._id },
+      { userId: user.id },
       Deno.env.get("ACCESS_TOKEN_SECRET")!,
       {
         expiresIn: "15min",
@@ -60,8 +61,8 @@ export const checkRefreshToken=async (refreshToken:string)=>{
     }
 
     // 2. get user
-    const user = await userExists(data.userId)
-
+    let user = await retrieveUser(Number(data.userId))
+    user=user[0][0]
     // 3.check refresh token version
     if (!user || user.refreshTokenVersion !== data.refreshTokenVersion) {
     return 'unauthorized'
