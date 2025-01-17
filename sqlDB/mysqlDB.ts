@@ -1,5 +1,6 @@
 // @ts-types="npm:@types/node@22.10.7"
 import mysql, { PoolOptions} from 'npm:mysql2/promise';
+
 const access: PoolOptions = {
   host: '127.0.0.1',
   user: 'root',
@@ -71,17 +72,50 @@ export async function updateOauthUserUsername(username:string,userId:string){
 // console.log('result 3:',result3)
 // const result4=await checkIfOAuthUserExists('nothing')
 // console.log('result 4:',result4)
-
+interface Recipe {
+    id: number;
+    recipe_name: string;
+    ingredients: string; // JSON string
+    directions: string; // JSON string
+    NER: string; // JSON string
+    Carbohydrate_by_difference: number;
+    Carbohydrate_by_summation: number;
+    Energy: number;
+    Fiber_total_dietary: number;
+    Iron_Fe: number;
+    Protein: number;
+    Retinol: number;
+    Riboflavin: number;
+    Starch: number;
+    Sugars_Total: number;
+    Total_fat_NLEA: number;
+    Vitamin_A_RAE: number;
+    Vitamin_B_12: number;
+    Vitamin_C_total_ascorbic_acid: number;
+    Vitamin_D_D2_and_D3: number;
+    Vitamin_D4: number;
+    image_url: string;
+  }
 
 export async function getPaginatedRecipes(number_of_results:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_paginated_recipes(?,?)`,[next,number_of_results])
-        return results[0][0]
+        let recipes:Recipe[]=results[0][0]
+        recipes=recipes.map((recipe)=>{
+            return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
+            }}
+        )
+        return recipes
 
     }
     else{
         const results=await connection.query(`CALL get_first_page_recipes(?)`,[number_of_results])
-        return results[0][0]
+        let recipes:Recipe[]=results[0][0]
+        recipes=recipes.map((recipe)=>{
+            return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
+            }}
+        )
+        return recipes
 
     }
 
