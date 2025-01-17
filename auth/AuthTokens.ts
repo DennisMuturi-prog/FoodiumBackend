@@ -1,6 +1,4 @@
 import * as jwt from "jsonwebtoken";
-import {AuthenticatedUser, PasswordUser} from "../types/types.ts";
-import { userExists } from "../database/db.ts";
 import { retrieveUser } from "../sqlDB/mysqlDB.ts";
 export type RefreshTokenData = {
     userId: string;
@@ -12,7 +10,7 @@ userId: string;
 };
   
 export const createAuthTokens = (
-    user: AuthenticatedUser | PasswordUser
+    user: {id:number,refreshTokenVersion:number}
   ): { refreshToken: string; accessToken: string } => {
     const refreshToken = jwt.sign(
       { userId: user.id, refreshTokenVersion: user.refreshTokenVersion },
