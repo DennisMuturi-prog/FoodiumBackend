@@ -35,7 +35,7 @@ export const addUsernameForOauthHandler:RequestHandler=async(req,res)=>{
     }
     else{
         const user=await updateOauthUserUsername(oauthAddusernameInfo.username,req.userId)
-        return res.json(user)
+        return res.json({...user,newTokens:req.newTokens})
     }
 }
 export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
@@ -45,7 +45,8 @@ export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
             const recipes=await getPaginatedRecipes(pageInfo.numberOfResults,pageInfo.next)
             const recipesResponse={
                 results:recipes,
-                next:recipes[recipes.length-1]['id']
+                next:recipes[recipes.length-1]['id'],
+                newTokens:req.newTokens
             }
             return res.json(recipesResponse)
         }
@@ -53,7 +54,8 @@ export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
             const recipes=await getPaginatedRecipes(5,pageInfo.next)
             const recipesResponse={
                 results:recipes,
-                next:recipes[recipes.length-1]['id']
+                next:recipes[recipes.length-1]['id'],
+                newTokens:req.newTokens
             }
             return res.json(recipesResponse)
         }
@@ -61,7 +63,8 @@ export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
             const recipes=await getPaginatedRecipes(pageInfo.numberOfResults)
             const recipesResponse={
                 results:recipes,
-                next:recipes[recipes.length-1]['id']
+                next:recipes[recipes.length-1]['id'],
+                newTokens:req.newTokens
             }
             return res.json(recipesResponse)
         }
@@ -69,7 +72,8 @@ export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
             const recipes=await getPaginatedRecipes(5)
             const recipesResponse={
                 results:recipes,
-                next:recipes[recipes.length-1]['id']
+                next:recipes[recipes.length-1]['id'],
+                newTokens:req.newTokens
             }
             return res.json(recipesResponse)
         }
