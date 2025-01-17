@@ -1,6 +1,5 @@
 // @ts-types="npm:@types/node@22.10.7"
 import mysql, { PoolOptions} from 'npm:mysql2/promise';
-
 const access: PoolOptions = {
   host: '127.0.0.1',
   user: 'root',
@@ -66,6 +65,20 @@ export async function checkUsernameAvaliabilty(username:string){
 // console.log('result 4:',result4)
 
 
+export async function getPaginatedRecipes(number_of_results:number,next?:number){
+    if(next){
+        const results=await connection.query(`CALL get_paginated_recipes(?,?)`,[next,number_of_results])
+        return results[0][0]
+
+    }
+    else{
+        const results=await connection.query(`CALL get_first_page_recipes(?)`,[number_of_results])
+        return results[0][0]
+
+    }
+
+
+}
 
 
 
