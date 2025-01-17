@@ -15,6 +15,9 @@ type passwordUser={
     email:string,
     password:string,
 }
+type usernameAvailabilty={
+    status:string
+}
 
 const connection = await mysql.createPool(access);
 // const results = await connection.query("CALL add_oauth_user('googleusertester8','good8@gmail.com','googly')");
@@ -35,9 +38,14 @@ export async function retrieveUser(id:number){
     const results=await connection.query(`CALL retrieve_user(?)`,[id])
     return results[0]
 }
-export async function checkUsernameAvaliabilty(username:string){
+export async function checkUsernameAvaliabilty(username:string):Promise<usernameAvailabilty>{
     const results=await connection.query(`CALL check_username_availability(?)`,[username])
     return results[0][0][0]
+}
+export async function updateOauthUserUsername(username:string,userId:string){
+    const results=await connection.query(`CALL update_oauthUser_username(?,?)`,[username,userId])
+    return results[0]
+
 }
 // const test=await checkUsernameAvaliabilty('mimi2')
 // console.log(test)
