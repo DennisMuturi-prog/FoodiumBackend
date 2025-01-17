@@ -4,7 +4,7 @@ import express from 'express'
 import passport from 'passport'
 import './auth/auth.ts'
 import { createAuthTokens } from "./auth/AuthTokens.ts";
-import { checkAuthentication } from "./RouteHandlers/routesHandler.ts";
+import { checkAuthentication, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
 
 const app=express()
 app.use(express.urlencoded({extended:false,limit: '50mb'}));
@@ -38,6 +38,8 @@ app.post('/protected',checkAuthentication,(req,res)=>{
   }
   return res.json({id:req.userId})
 })
+app.post('/register',registerRouteHandler)
+app.post('/login',loginRouteHandler)
 app.get('/failure', (_req, res) => {
   res.send(`
     <!DOCTYPE html>
