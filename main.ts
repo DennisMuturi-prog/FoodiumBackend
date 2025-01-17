@@ -5,6 +5,7 @@ import passport from 'passport'
 import './auth/auth.ts'
 import { createAuthTokens } from "./auth/AuthTokens.ts";
 import { checkAuthentication, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
+import {fetchPaginatedRecipesHandler} from "./RouteHandlers/routesHandler.ts"
 
 const app=express()
 app.use(express.urlencoded({extended:false,limit: '50mb'}));
@@ -40,6 +41,7 @@ app.post('/protected',checkAuthentication,(req,res)=>{
 })
 app.post('/register',registerRouteHandler)
 app.post('/login',loginRouteHandler)
+app.post('/getRecipes',fetchPaginatedRecipesHandler)
 app.get('/failure', (_req, res) => {
   res.send(`
     <!DOCTYPE html>
