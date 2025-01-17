@@ -2,7 +2,7 @@
 import {RequestHandler} from 'express'
 import { checkAccessToken,checkRefreshToken, createAuthTokens } from "../auth/AuthTokens.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import { checkIfPasswordUserExists, registerPasswordUser } from "../sqlDB/mysqlDB.ts";
+import { checkIfPasswordUserExists, getPaginatedRecipes, registerPasswordUser } from "../sqlDB/mysqlDB.ts";
 
 interface CheckAuthRequestBody{
     accessToken:string;
@@ -16,6 +16,53 @@ interface RegisterRequestBody{
 interface LoginRequestBody{
     username:string;
     password:string;
+}
+interface GetPaginatedRecipesBody{
+    numberOfResults:number
+    next?:number
+}
+export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
+    const pageInfo=<GetPaginatedRecipesBody>req.body
+    try {
+        if(pageInfo.numberOfResults&&pageInfo.next){
+            const recipes=await getPaginatedRecipes(pageInfo.numberOfResults,pageInfo.next)
+            const recipesResponse={
+                results:recipes,
+                next:recipes[recipes.length-1]['id']
+            }
+            return res.json(recipesResponse)
+        }
+        else if(!pageInfo.numberOfResults&&pageInfo.next){
+            const recipes=await getPaginatedRecipes(5,pageInfo.next)
+            const recipesResponse={
+                results:recipes,
+                next:recipes[recipes.length-1]['id']
+            }
+            return res.json(recipesResponse)
+        }
+        else if(pageInfo.numberOfResults&&!pageInfo.next){
+            const recipes=await getPaginatedRecipes(pageInfo.numberOfResults)
+            const recipesResponse={
+                results:recipes,
+                next:recipes[recipes.length-1]['id']
+            }
+            return res.json(recipesResponse)
+        }
+        else{
+            const recipes=await getPaginatedRecipes(5)
+            const recipesResponse={
+                results:recipes,
+                next:recipes[recipes.length-1]['id']
+            }
+            return res.json(recipesResponse)
+        }
+        
+    } catch (error) {
+        
+        console.log(error);
+        return res.status(404).send('an errror occurred while retrieving recipes')
+        
+    }
 }
 export const loginRouteHandler:RequestHandler=async (req,res)=>{
     try {
@@ -54,7 +101,7 @@ export const registerRouteHandler:RequestHandler=async (req,res)=>{
     try {
         const possibleUser=await checkIfPasswordUserExists(registerInfo.username)
         if(possibleUser[0].length>0){
-            return res.status(404).send('user acccount already exists')
+            return res.status(404).send('username already taken,choose another username')
         }
         const hashedPassword=await bcrypt.hash(registerInfo.password)
         const userObj={
