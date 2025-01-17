@@ -4,7 +4,7 @@ import express from 'express'
 import passport from 'passport'
 import './auth/auth.ts'
 import { createAuthTokens } from "./auth/AuthTokens.ts";
-import { checkAuthentication, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
+import { addUsernameForOauthHandler, checkAuthentication, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
 import {fetchPaginatedRecipesHandler} from "./RouteHandlers/routesHandler.ts"
 
 const app=express()
@@ -41,7 +41,8 @@ app.post('/protected',checkAuthentication,(req,res)=>{
 })
 app.post('/register',registerRouteHandler)
 app.post('/login',loginRouteHandler)
-app.post('/getRecipes',fetchPaginatedRecipesHandler)
+app.post('/getRecipes',checkAuthentication,fetchPaginatedRecipesHandler)
+app.post('/addUsername',checkAuthentication,addUsernameForOauthHandler)
 app.get('/failure', (_req, res) => {
   res.send(`
     <!DOCTYPE html>
