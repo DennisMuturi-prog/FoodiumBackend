@@ -2,7 +2,7 @@
 import {RequestHandler} from 'express'
 import { checkAccessToken,checkRefreshToken, createAuthTokens } from "../auth/AuthTokens.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import { checkIfPasswordUserExists, getPaginatedRecipes, registerPasswordUser } from "../sqlDB/mysqlDB.ts";
+import { checkIfPasswordUserExists, checkUsernameAvaliabilty, getPaginatedRecipes, registerPasswordUser, updateOauthUserUsername } from "../sqlDB/mysqlDB.ts";
 
 interface CheckAuthRequestBody{
     accessToken:string;
@@ -20,6 +20,23 @@ interface LoginRequestBody{
 interface GetPaginatedRecipesBody{
     numberOfResults:number
     next?:number
+}
+interface OauthAddUsername{
+    username:string
+}
+export const addUsernameForOauthHandler:RequestHandler=async(req,res)=>{
+    const oauthAddusernameInfo=<OauthAddUsername>req.body
+    if(!oauthAddusernameInfo.username){
+        return res.status(404).send('provide username')
+    }
+    const usernameAvailabilty=await checkUsernameAvaliabilty(oauthAddusernameInfo.username)
+    if(usernameAvailabilty.status=='unavailable'){
+        return res.status(404).send(`the username ${oauthAddusernameInfo.username} is already taken,choose another one`)
+    }
+    else{
+        const user=await updateOauthUserUsername(oauthAddusernameInfo.username,req.userId)
+        return res.json(user)
+    }
 }
 export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
     const pageInfo=<GetPaginatedRecipesBody>req.body
