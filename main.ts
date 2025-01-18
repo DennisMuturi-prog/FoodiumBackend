@@ -4,7 +4,7 @@ import express from 'express'
 import passport from 'passport'
 import './auth/auth.ts'
 import { createAuthTokens } from "./auth/AuthTokens.ts";
-import { addUsernameForOauthHandler, checkAuthentication, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
+import { addRecipeIntakeHandler, addRecipeRatingHandler, addRecipeReviewHandler, addUsernameForOauthHandler, checkAuthentication, getReviewsHandler, getUserRatingsHandler, getUserRecipeIntakeHandler, getUserReviewsHandler, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
 import {fetchPaginatedRecipesHandler} from "./RouteHandlers/routesHandler.ts"
 
 const app=express()
@@ -43,6 +43,16 @@ app.post('/register',registerRouteHandler)
 app.post('/login',loginRouteHandler)
 app.post('/getRecipes',checkAuthentication,fetchPaginatedRecipesHandler)
 app.post('/addUsername',checkAuthentication,addUsernameForOauthHandler)
+app.post('/addReview',checkAuthentication,addRecipeReviewHandler)
+app.post('/addRating',checkAuthentication,addRecipeRatingHandler)
+app.post('/getRecipeReviews',checkAuthentication,getReviewsHandler)
+app.post('/addRecipeIntake',checkAuthentication,addRecipeIntakeHandler)
+app.post('/getUserReviews',checkAuthentication,getUserReviewsHandler)
+app.post('/getUserRatings',checkAuthentication,getUserRatingsHandler)
+app.post('/getUserRecipeIntake',checkAuthentication,getUserRecipeIntakeHandler)
+
+
+
 app.get('/failure', (_req, res) => {
   res.send(`
     <!DOCTYPE html>
