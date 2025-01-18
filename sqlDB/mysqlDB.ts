@@ -96,7 +96,69 @@ interface Recipe {
     Vitamin_D4: number;
     image_url: string;
   }
+export interface Review{
+    reviewText:string;
+    recipeId:number;
+    reviewerId:number
+}
+export interface Rating{
+    ratingNumber:number;
+    recipeId:number;
+    raterId:number
+}
+export interface RecipeIntake{
+    userId:number
+    recipeId:number
+}
+export async function addRecipeIntake(recipeIntake:RecipeIntake){
+    const results = await connection.query(`CALL add_recipe_intake(?,?)`,[recipeIntake.userId,recipeIntake.recipeId]);
+    return results[0]
+}
+export async function findUserReviews(userId:number,next?:number){
+    if(next){
+        const results=await connection.query(`CALL get_user_paginated_reviews(?,?)`,[userId,next])
+        return results[0][0]
+    }
+    else{
+        const results=await connection.query(`CALL get_user_first_page_reviews(?)`,[userId])
+        return results[0][0]
+    }
+}
+export async function findUserRatings(userId:number,next?:number){
+    if(next){
+        const results=await connection.query(`CALL get_user_paginated_ratings(?,?)`,[userId,next])
+        return results[0][0]
 
+    }
+    else{
+        const results=await connection.query(`CALL get_user_first_page_ratings(?)`,[userId])
+        return results[0][0]  
+    }
+}
+export async function findRecipeReviews(recipeId:number,number_of_results?:number,next?:number){
+    if(next){
+        const results=await connection.query(`CALL get_paginated_reviews(?,?,?)`,[recipeId,number_of_results,next])
+        return results[0][0]
+    }
+    else{
+        const results=await connection.query(`CALL get_first_page_reviews(?,?)`,[recipeId,number_of_results])
+        return results[0][0]
+    }
+}
+export async function addReview(review:Review){
+    const results = await connection.query(`CALL add_recipe_review(?,?,?)`,[review.reviewText,review.recipeId,review.reviewerId]);
+    if(results[1]==undefined){
+        return 'already reviewed'
+    }
+    return results[0][0][0]
+}
+export async function addRating(rating:Rating){
+    const results = await connection.query(`CALL add_recipe_rating(?,?,?)`,[rating.ratingNumber,rating.recipeId,rating.raterId]);
+    if(results[1]==undefined){
+        return 'already rated'
+    }
+    return results[0][0][0]
+}
 export async function getPaginatedRecipes(number_of_results:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_paginated_recipes(?,?)`,[next,number_of_results])
@@ -121,6 +183,31 @@ export async function getPaginatedRecipes(number_of_results:number,next?:number)
 
 
 }
+export async function findUserRecipeIntake(userId:number,next?:number){
+    if(next){
+        const results=await connection.query(`CALL get_user_paginated_recipe_intake(?,?)`,[userId,next])
+        let recipes:Recipe[]=results[0][0]
+        recipes=recipes.map((recipe)=>{
+            return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
+            }}
+        )
+        return recipes
+
+    }
+    else{
+        const results=await connection.query(`CALL get_user_first_page_recipe_intake(?)`,[userId])
+        let recipes:Recipe[]=results[0][0]
+        recipes=recipes.map((recipe)=>{
+            return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
+            }}
+        )
+        return recipes
+
+    }
+
+
+}
+
 
 
 
