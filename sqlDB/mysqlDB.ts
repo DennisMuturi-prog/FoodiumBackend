@@ -21,8 +21,6 @@ type usernameAvailabilty={
 }
 
 const connection = await mysql.createPool(access);
-// const results = await connection.query("CALL add_oauth_user('googleusertester8','good8@gmail.com','googly')");
-// console.log(results[0]);
 export async function registerOauthUser(registerRequest:oAuthUser){
     const results = await connection.query(`CALL add_oauth_user(?,?)`,[registerRequest.email,registerRequest.google_id]);
     return results[0]
@@ -48,30 +46,6 @@ export async function updateOauthUserUsername(username:string,userId:string){
     return results[0]
 
 }
-// const test=await checkUsernameAvaliabilty('mimi2')
-// console.log(test)
-
-
-
-// const testuser:oAuthUser={
-//     email:'mutz@mutz.com',
-//     google_id:'testgoogle5',
-// }
-// const testuser2:passwordUser={
-//     username:'dennis',
-//     email:'mutz@mutz.com',
-//     password:'googler',
-//     salt:'saltChumvi'
-// }
-// const result1=await registerOauthUser(testuser)
-// console.log('result 1:',result1[0][0])
-
-// const result2=await registerPasswordUser(testuser2)
-// console.log('result 2:',result2)
-// const result3=await checkIfOAuthUserExists('googly')
-// console.log('result 3:',result3)
-// const result4=await checkIfOAuthUserExists('nothing')
-// console.log('result 4:',result4)
 interface Recipe {
     id: number;
     recipe_name: string;
