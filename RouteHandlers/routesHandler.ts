@@ -2,7 +2,10 @@
 import {RequestHandler} from 'express'
 import { checkAccessToken,checkRefreshToken, createAuthTokens } from "../auth/AuthTokens.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import { checkIfPasswordUserExists, checkUsernameAvaliabilty, getPaginatedRecipes, registerPasswordUser, updateOauthUserUsername } from "../sqlDB/mysqlDB.ts";
+import { addRating, addRecipeIntake, addReview, checkIfPasswordUserExists, checkUsernameAvaliabilty, findRecipeReviews, getPaginatedRecipes, Rating, registerPasswordUser, Review, updateOauthUserUsername } from "../sqlDB/mysqlDB.ts";
+import { findUserRatings } from "../sqlDB/mysqlDB.ts";
+import { findUserReviews } from "../sqlDB/mysqlDB.ts";
+import {findUserRecipeIntake} from '../sqlDB/mysqlDB.ts'
 
 interface CheckAuthRequestBody{
     accessToken:string;
@@ -21,21 +24,240 @@ interface GetPaginatedRecipesBody{
     numberOfResults:number
     next?:number
 }
-interface OauthAddUsername{
+interface OauthAddUsernameBody{
     username:string
 }
+interface ReviewBody{
+    reviewText:string
+    recipeId:number;
+
+}
+interface RatingBody{
+    ratingNumber:number;
+    recipeId:number;
+}
+interface getReviewsBody{
+    recipeId:number;
+    numberOfResults:number;
+    next?:number
+}
+interface addRecipeIntakeBody{
+    recipeId:number;
+}
+interface getUserReviewsBody{
+    next?:number
+}
+interface getUserRatingsBody{
+    next?:number
+}
+export const getUserRecipeIntakeHandler:RequestHandler=async (req,res)=>{
+    const getUserRecipeIntakeInfo=<getUserRatingsBody>req.body
+    try {
+        if(getUserRecipeIntakeInfo.next){
+            const results=await findUserRecipeIntake(Number(req.userId),getUserRecipeIntakeInfo.next)
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user intake available')
+            }
+        }
+        else{
+            const results=await findUserRecipeIntake(Number(req.userId))
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user recipe intake available')
+            }
+        }
+        
+    } catch (error) {
+        console.log('error at get user ratings',error)
+        return res.status(404).send('an error occurred while retrieving user ratings,try again')    
+    }
+}
+export const getUserRatingsHandler:RequestHandler=async (req,res)=>{
+    const getUserRatingsInfo=<getUserRatingsBody>req.body
+    try {
+        if(getUserRatingsInfo.next){
+            const results=await findUserRatings(Number(req.userId),getUserRatingsInfo.next)
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user ratings available')
+            }
+        }
+        else{
+            const results=await findUserRatings(Number(req.userId))
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user ratings available')
+            }
+        }
+        
+    } catch (error) {
+        console.log('error at get user ratings',error)
+        return res.status(404).send('an error occurred while retrieving user ratings,try again')    
+    }
+}
+export const getUserReviewsHandler:RequestHandler=async (req,res)=>{
+    const getUserReviewsInfo=<getUserRatingsBody>req.body
+    try {
+        if(getUserReviewsInfo.next){
+            const results=await findUserReviews(Number(req.userId),getUserReviewsInfo.next)
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user reviews available')
+            }
+        }
+        else{
+            const results=await findUserReviews(Number(req.userId))
+            if(results.length>0){
+                return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no user reviews available')
+            }
+        }
+        
+    } catch (error) {
+        console.log('error at get user ratings',error)
+        return res.status(404).send('an error occurred while retrieving user ratings,try again')    
+    }
+}
+export const addRecipeIntakeHandler:RequestHandler=async (req,res)=>{
+    const addRecipeIntakeInfo=<addRecipeIntakeBody>req.body
+    if(!addRecipeIntakeInfo.recipeId){
+        return res.status(404).send('provide recipe id')
+    }
+    try {
+        const results=await addRecipeIntake({userId:Number(req.userId),recipeId:addRecipeIntakeInfo.recipeId})
+        return res.json({results,newTokens:req.newTokens})
+    } catch (error) {
+        console.log('error at add recipe intake',error)
+        return res.status(404).send('an error occurred while adding recipe intake,try again')     
+    }
+}
+export const getReviewsHandler:RequestHandler=async (req,res)=>{
+    const getReviewsInfo=<getReviewsBody>req.body
+    if(!getReviewsInfo.recipeId){
+        return res.status(404).send('provide recipe id')
+    }
+    try {
+        if(getReviewsInfo.numberOfResults&&getReviewsInfo.next){
+            const reviews=await findRecipeReviews(getReviewsInfo.recipeId,getReviewsInfo.numberOfResults,getReviewsInfo.next)
+            console.log(reviews)
+            if(reviews.length>0){
+                return res.json({results:reviews,next:reviews[reviews.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no reviews available')
+            }
+        }
+        else if(getReviewsInfo.numberOfResults&&!getReviewsInfo.next){
+            const reviews=await findRecipeReviews(getReviewsInfo.recipeId,getReviewsInfo.numberOfResults)
+            if(reviews.length>0){
+                return res.json({results:reviews,next:reviews[reviews.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no reviews available')
+            }
+        }
+        else if(!getReviewsInfo.numberOfResults&&getReviewsInfo.next){
+            const reviews=await findRecipeReviews(getReviewsInfo.recipeId,5,getReviewsInfo.next)
+            if(reviews.length>0){
+                return res.json({results:reviews,next:reviews[reviews.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no reviews available')
+            }
+        }
+        else{
+            const reviews=await findRecipeReviews(getReviewsInfo.recipeId,5)
+            if(reviews.length>0){
+                return res.json({results:reviews,next:reviews[reviews.length-1]['id'],newTokens:req.newTokens})
+            }
+            else{
+                return res.send('no reviews available')
+            }
+        }
+        
+    } catch (error) {
+        console.log('Error at retrieving reviews:',error)
+        return res.status(404).send('an error occurred while retrieving reviews,try again')  
+    }
+}
+
+export const addRecipeReviewHandler:RequestHandler=async (req,res)=>{
+    const addReviewInfo=<ReviewBody>req.body
+    if(!(addReviewInfo.reviewText&&addReviewInfo.recipeId)){
+        return res.status(404).send('provide review text and recipe id')
+    }
+    try {
+        const review:Review={
+            reviewText:addReviewInfo.reviewText,
+            recipeId:addReviewInfo.recipeId,
+            reviewerId:Number(req.userId)
+        }
+        const addReviewResult=await addReview(review)
+        if(addReviewResult=='already reviewed'){
+            return res.status(404).send('you already reviewed this recipe,want to update')
+        }
+        return res.json({...addReviewResult,newTokens:req.newTokens})
+        
+    } catch (error) {
+        console.log('Error at adding a review',error)
+        return res.status(404).send('an error occurred while adding review,try again')   
+    }
+}
+export const addRecipeRatingHandler:RequestHandler=async (req,res)=>{
+    const addRatingInfo=<RatingBody>req.body
+    if(!(addRatingInfo.ratingNumber&&addRatingInfo.recipeId)){
+        return res.status(404).send('provide rating number and recipe id')
+    }
+    try {
+        const rating:Rating={
+            ratingNumber:addRatingInfo.ratingNumber,
+            recipeId:addRatingInfo.recipeId,
+            raterId:Number(req.userId)
+        }
+        const addRatingResult=await addRating(rating)
+        if(addRatingResult=='already rated'){
+            return res.status(404).send('you already rated this recipe,want to update')
+        }
+        return res.json({...addRatingResult,newTokens:req.newTokens})
+        
+    } catch (error) {
+        console.log('Error at adding a rating:',error)
+        return res.status(404).send('an error occurred while adding a rating,try again')
+    }
+}
+
 export const addUsernameForOauthHandler:RequestHandler=async(req,res)=>{
-    const oauthAddusernameInfo=<OauthAddUsername>req.body
+    const oauthAddusernameInfo=<OauthAddUsernameBody>req.body
     if(!oauthAddusernameInfo.username){
         return res.status(404).send('provide username')
     }
-    const usernameAvailabilty=await checkUsernameAvaliabilty(oauthAddusernameInfo.username)
-    if(usernameAvailabilty.status=='unavailable'){
-        return res.status(404).send(`the username ${oauthAddusernameInfo.username} is already taken,choose another one`)
-    }
-    else{
-        const user=await updateOauthUserUsername(oauthAddusernameInfo.username,req.userId)
-        return res.json({...user,newTokens:req.newTokens})
+    try {
+        const usernameAvailabilty=await checkUsernameAvaliabilty(oauthAddusernameInfo.username)
+        if(usernameAvailabilty.status=='unavailable'){
+            return res.status(404).send(`the username ${oauthAddusernameInfo.username} is already taken,choose another one`)
+        }
+        else{
+            const user=await updateOauthUserUsername(oauthAddusernameInfo.username,req.userId)
+            return res.json({...user,newTokens:req.newTokens})
+        }
+        
+    } catch (error) {
+        console.log('Error at addUsername:',error);
+        return res.status(404).send('an error occurred while adding username,try again')
+        
     }
 }
 export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
@@ -81,7 +303,7 @@ export const fetchPaginatedRecipesHandler:RequestHandler=async(req,res)=>{
     } catch (error) {
         
         console.log(error);
-        return res.status(404).send('an errror occurred while retrieving recipes')
+        return res.status(404).send('an errror occurred while retrieving recipes,try again')
         
     }
 }
@@ -110,7 +332,7 @@ export const loginRouteHandler:RequestHandler=async (req,res)=>{
         
     } catch (error) {
         console.log('error at login',error)
-        return res.status(404).send('an error occurred,try again')  
+        return res.status(404).send('an error occurred while logging in,try again')  
     }
 }
 
@@ -140,7 +362,7 @@ export const registerRouteHandler:RequestHandler=async (req,res)=>{
         
     } catch (error) {
         console.log('error at register route:',error)
-        return res.status(404).send('an error occurred,try again,') 
+        return res.status(404).send('an error occurred while registering,try again,') 
     }
 }
 export const checkAuthentication:RequestHandler=async (req,res,next)=>{
