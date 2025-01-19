@@ -2,7 +2,7 @@
 import {RequestHandler} from 'express'
 import { checkAccessToken,checkRefreshToken, createAuthTokens } from "../auth/AuthTokens.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import { addRating, addRecipeIntake, addReview, checkIfPasswordUserExists, checkUsernameAvaliabilty, findRecipeReviews, getPaginatedRecipes, Rating, registerPasswordUser, Review, updateOauthUserUsername } from "../sqlDB/mysqlDB.ts";
+import { addRating, addRecipeIntake, addReview, checkIfPasswordUserExists, checkUsernameAvailability, findRecipeReviews, getPaginatedRecipes, Rating, registerPasswordUser, Review, updateOauthUserUsername } from "../sqlDB/mysqlDB.ts";
 import { findUserRatings } from "../sqlDB/mysqlDB.ts";
 import { findUserReviews } from "../sqlDB/mysqlDB.ts";
 import {findUserRecipeIntake} from '../sqlDB/mysqlDB.ts'
@@ -59,7 +59,7 @@ export const getUserRecipeIntakeHandler:RequestHandler=async (req,res)=>{
                 return res.json({results,next:results[results.length-1]['id'],newTokens:req.newTokens})
             }
             else{
-                return res.send('no user intake available')
+                return res.send('no user recipe intake available')
             }
         }
         else{
@@ -138,7 +138,7 @@ export const addRecipeIntakeHandler:RequestHandler=async (req,res)=>{
     }
     try {
         const results=await addRecipeIntake({userId:Number(req.userId),recipeId:addRecipeIntakeInfo.recipeId})
-        return res.json({results,newTokens:req.newTokens})
+        return res.json({...results,newTokens:req.newTokens})
     } catch (error) {
         console.log('error at add recipe intake',error)
         return res.status(404).send('an error occurred while adding recipe intake,try again')     
@@ -206,7 +206,7 @@ export const addRecipeReviewHandler:RequestHandler=async (req,res)=>{
             reviewerId:Number(req.userId)
         }
         const addReviewResult=await addReview(review)
-        if(addReviewResult=='already reviewed'){
+        if(addReviewResult.task=='not added'){
             return res.status(404).send('you already reviewed this recipe,want to update')
         }
         return res.json({...addReviewResult,newTokens:req.newTokens})
@@ -228,7 +228,7 @@ export const addRecipeRatingHandler:RequestHandler=async (req,res)=>{
             raterId:Number(req.userId)
         }
         const addRatingResult=await addRating(rating)
-        if(addRatingResult=='already rated'){
+        if(addRatingResult.task=='not added'){
             return res.status(404).send('you already rated this recipe,want to update')
         }
         return res.json({...addRatingResult,newTokens:req.newTokens})
@@ -245,12 +245,12 @@ export const addUsernameForOauthHandler:RequestHandler=async(req,res)=>{
         return res.status(404).send('provide username')
     }
     try {
-        const usernameAvailabilty=await checkUsernameAvaliabilty(oauthAddusernameInfo.username)
+        const usernameAvailabilty=await checkUsernameAvailability(oauthAddusernameInfo.username)
         if(usernameAvailabilty.status=='unavailable'){
             return res.status(404).send(`the username ${oauthAddusernameInfo.username} is already taken,choose another one`)
         }
         else{
-            const user=await updateOauthUserUsername(oauthAddusernameInfo.username,req.userId)
+            const user=await updateOauthUserUsername(oauthAddusernameInfo.username,Number(req.userId))
             return res.json({...user,newTokens:req.newTokens})
         }
         
@@ -314,17 +314,17 @@ export const loginRouteHandler:RequestHandler=async (req,res)=>{
             return res.status(404).send('provide all fields:username,password')
         }
         const possibleUser=await checkIfPasswordUserExists(loginInfo.username)
-        if(possibleUser[0].length==0){
+        if(possibleUser.length==0){
             return res.status(404).send('no account with such username exists')
         }
-        const hashedPassword=possibleUser[0][0]['hashed_password']
+        const hashedPassword=possibleUser[0]['hashed_password']
         const correctpassword=await bcrypt.compare(loginInfo.password,hashedPassword)
         if(!correctpassword){
             return res.status(404).send('wrong password')
         }
         const userInfo={
-            id:possibleUser[0][0]['id'],
-            refreshTokenVersion:possibleUser[0][0]['refreshTokenversion'],
+            id:possibleUser[0]['id'],
+            refreshTokenVersion:possibleUser[0]['refreshTokenversion'],
         }
         const userTokens=createAuthTokens(userInfo)
         return res.json(userTokens)
@@ -343,7 +343,7 @@ export const registerRouteHandler:RequestHandler=async (req,res)=>{
     }
     try {
         const possibleUser=await checkIfPasswordUserExists(registerInfo.username)
-        if(possibleUser[0].length>0){
+        if(possibleUser.length>0){
             return res.status(404).send('username already taken,choose another username')
         }
         const hashedPassword=await bcrypt.hash(registerInfo.password)
@@ -354,7 +354,7 @@ export const registerRouteHandler:RequestHandler=async (req,res)=>{
         }
         const user=await registerPasswordUser(userObj)
         const registeredUser={
-            id:user[0][0]['last_insert_id()'],
+            id:user['last_insert_id()'],
             refreshTokenVersion:0
         }
         const userTokens=createAuthTokens(registeredUser)
