@@ -1,12 +1,21 @@
-// @ts-types="npm:@types/node@22.10.7"
-import mysql, { PoolOptions} from 'npm:mysql2/promise';
+import { Client,TLSConfig,TLSMode } from "https://deno.land/x/mysql/mod.ts"; 
+const tlsConfig: TLSConfig = {
+    mode: TLSMode.VERIFY_IDENTITY,
+    caCerts: [
+        await Deno.readTextFile("DigiCertGlobalRootCA.crt.pem"),
+    ],
+    };
+console.log(Deno.env.get("AZURE_HOSTNAME"));
 
-const access: PoolOptions = {
-  host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'foodium',
-};
+const connectionOptions={
+    hostname: Deno.env.get("AZURE_HOSTNAME"),
+    username: Deno.env.get("AZURE_USERNAME"),
+    password: Deno.env.get("AZURE_PASSWWORD"), 
+    db:Deno.env.get("AZURE_DB"), 
+    port:3306,
+    tls: tlsConfig
+}
+const connection = await new Client().connect(connectionOptions);
 type oAuthUser={
     email:string,
     google_id:string
@@ -19,8 +28,6 @@ type passwordUser={
 type usernameAvailabilty={
     status:string
 }
-
-const connection = await mysql.createPool(access);
 export async function registerOauthUser(registerRequest:oAuthUser){
     const results = await connection.query(`CALL add_oauth_user(?,?)`,[registerRequest.email,registerRequest.google_id]);
     return results[0]
@@ -31,20 +38,20 @@ export async function registerPasswordUser(registerRequest:passwordUser){
 }
 export async function checkIfPasswordUserExists(username:string){
     const results=await connection.query(`CALL retrieve_password_user(?)`,[username])
-    return results[0]
+    return results
 }
 export async function retrieveUser(id:number){
     const results=await connection.query(`CALL retrieve_user(?)`,[id])
-    return results[0]
+    return results
 }
-export async function checkUsernameAvaliabilty(username:string):Promise<usernameAvailabilty>{
+export async function checkUsernameAvailability(username:string):Promise<usernameAvailabilty>{
     const results=await connection.query(`CALL check_username_availability(?)`,[username])
-    return results[0][0][0]
-}
-export async function updateOauthUserUsername(username:string,userId:string){
-    const results=await connection.query(`CALL update_oauthUser_username(?,?)`,[username,userId])
     return results[0]
-
+}
+export async function updateOauthUserUsername(username:string,userId:number){
+    const results=await connection.query(`CALL update_oauthUser_username(?,?)`,[username,userId])
+    return results
+    
 }
 interface Recipe {
     id: number;
@@ -69,7 +76,7 @@ interface Recipe {
     Vitamin_D_D2_and_D3: number;
     Vitamin_D4: number;
     image_url: string;
-  }
+}
 export interface Review{
     reviewText:string;
     recipeId:number;
@@ -86,81 +93,75 @@ export interface RecipeIntake{
 }
 export async function addRecipeIntake(recipeIntake:RecipeIntake){
     const results = await connection.query(`CALL add_recipe_intake(?,?)`,[recipeIntake.userId,recipeIntake.recipeId]);
-    return results[0]
+    return results
 }
 export async function findUserReviews(userId:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_user_paginated_reviews(?,?)`,[userId,next])
-        return results[0][0]
+        return results
     }
     else{
         const results=await connection.query(`CALL get_user_first_page_reviews(?)`,[userId])
-        return results[0][0]
+        return results
     }
 }
 export async function findUserRatings(userId:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_user_paginated_ratings(?,?)`,[userId,next])
-        return results[0][0]
-
+        return results
+        
     }
     else{
         const results=await connection.query(`CALL get_user_first_page_ratings(?)`,[userId])
-        return results[0][0]  
+        return results
     }
 }
 export async function findRecipeReviews(recipeId:number,number_of_results?:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_paginated_reviews(?,?,?)`,[recipeId,number_of_results,next])
-        return results[0][0]
+        return results
     }
     else{
         const results=await connection.query(`CALL get_first_page_reviews(?,?)`,[recipeId,number_of_results])
-        return results[0][0]
+        return results
     }
 }
-export async function addReview(review:Review){
+export async function addReview(review:Review):Promise<{task:string}>{
     const results = await connection.query(`CALL add_recipe_review(?,?,?)`,[review.reviewText,review.recipeId,review.reviewerId]);
-    if(results[1]==undefined){
-        return 'already reviewed'
-    }
-    return results[0][0][0]
+    
+    return results[0]
 }
-export async function addRating(rating:Rating){
+export async function addRating(rating:Rating):Promise<{task:string}>{
     const results = await connection.query(`CALL add_recipe_rating(?,?,?)`,[rating.ratingNumber,rating.recipeId,rating.raterId]);
-    if(results[1]==undefined){
-        return 'already rated'
-    }
-    return results[0][0][0]
+    return results[0]
 }
 export async function getPaginatedRecipes(number_of_results:number,next?:number){
     if(next){
         const results=await connection.query(`CALL get_paginated_recipes(?,?)`,[next,number_of_results])
-        let recipes:Recipe[]=results[0][0]
+        let recipes:Recipe[]=results
         recipes=recipes.map((recipe)=>{
             return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
             }}
         )
         return recipes
-
+        
     }
     else{
         const results=await connection.query(`CALL get_first_page_recipes(?)`,[number_of_results])
-        let recipes:Recipe[]=results[0][0]
+        let recipes:Recipe[]=results
         recipes=recipes.map((recipe)=>{
             return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
             }}
         )
         return recipes
-
+        
     }
-
-
+    
+    
 }
 export async function findUserRecipeIntake(userId:number,next?:number){
     if(next){
-        const results=await connection.query(`CALL get_user_paginated_recipe_intake(?,?)`,[userId,next])
-        let recipes:Recipe[]=results[0][0]
+        let recipes:Recipe[]=await connection.query(`CALL get_user_paginated_recipe_intake(?,?)`,[userId,next])
         recipes=recipes.map((recipe)=>{
             return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
             }}
@@ -169,20 +170,11 @@ export async function findUserRecipeIntake(userId:number,next?:number){
 
     }
     else{
-        const results=await connection.query(`CALL get_user_first_page_recipe_intake(?)`,[userId])
-        let recipes:Recipe[]=results[0][0]
+        let recipes:Recipe[]=await connection.query(`CALL get_user_first_page_recipe_intake(?)`,[userId])
         recipes=recipes.map((recipe)=>{
             return {...recipe,ingredients:JSON.parse(recipe['ingredients']),directions:JSON.parse(recipe['directions']),NER:JSON.parse(recipe['NER'])
             }}
         )
-        return recipes
-
-    }
-
-
+        return recipes  
+    }   
 }
-
-
-
-
-
