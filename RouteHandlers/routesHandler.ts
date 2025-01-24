@@ -381,7 +381,7 @@ export const loginRouteHandler:RequestHandler=async (req,res)=>{
             return res.status(404).send('wrong password')
         }
         const userInfo={
-            id:possibleUser[0]['userId'],
+            userId:possibleUser[0]['userId'],
             refreshTokenVersion:possibleUser[0]['refreshTokenversion'],
         }
         const userTokens=createAuthTokens(userInfo)
@@ -412,7 +412,7 @@ export const registerRouteHandler:RequestHandler=async (req,res)=>{
         }
         const user=await registerPasswordUser(userObj)
         const registeredUser={
-            id:user['userId'],
+            userId:user['userId'],
             refreshTokenVersion:0
         }
         const userTokens=createAuthTokens(registeredUser)
