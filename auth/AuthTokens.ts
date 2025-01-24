@@ -10,10 +10,10 @@ userId: string;
 };
   
 export const createAuthTokens = (
-    user: {id:string,refreshTokenVersion:number}
+    user: {userId:string,refreshTokenVersion:number}
   ): { refreshToken: string; accessToken: string } => {
     const refreshToken = jwt.sign(
-      { userId: user.id, refreshTokenVersion: user.refreshTokenVersion },
+      { userId: user.userId, refreshTokenVersion: user.refreshTokenVersion },
       Deno.env.get("REFRESH_TOKEN_SECRET")!,
       {
         expiresIn: "30d",
@@ -21,7 +21,7 @@ export const createAuthTokens = (
     );
   
     const accessToken = jwt.sign(
-      { userId: user.id },
+      { userId: user.userId },
       Deno.env.get("ACCESS_TOKEN_SECRET")!,
       {
         expiresIn: "15min",
