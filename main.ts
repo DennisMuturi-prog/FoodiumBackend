@@ -1,10 +1,10 @@
-// @deno-types="npm:@types/express@4.17.15"
+// @deno-types="npm:@types/express@^4.17.15"
 import express from 'express'
-// @deno-types="npm:@types/passport@1.0.17"
+// @deno-types="npm:@types/passport@^1.0.17"
 import passport from 'passport'
 import './auth/auth.ts'
 import { createAuthTokens } from "./auth/AuthTokens.ts";
-import { addRecipeIntakeHandler, addRecipeRatingHandler, addRecipeReviewHandler, addUsernameForOauthHandler, checkAuthentication, getReviewsHandler, getUserRatingsHandler, getUserRecipeIntakeHandler, getUserReviewsHandler, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
+import { addFoodIntakeHandler, addRecipeIntakeHandler, addRecipeRatingHandler, addRecipeReviewHandler, addUsernameForOauthHandler, checkAuthentication, getReviewsHandler, getUserFoodIntakeHandler, getUserRatingsHandler, getUserRecipeIntakeHandler, getUserReviewsHandler, loginRouteHandler, registerRouteHandler } from "./RouteHandlers/routesHandler.ts";
 import {fetchPaginatedRecipesHandler} from "./RouteHandlers/routesHandler.ts"
 
 const app=express()
@@ -47,9 +47,11 @@ app.post('/addReview',checkAuthentication,addRecipeReviewHandler)
 app.post('/addRating',checkAuthentication,addRecipeRatingHandler)
 app.post('/getRecipeReviews',checkAuthentication,getReviewsHandler)
 app.post('/addRecipeIntake',checkAuthentication,addRecipeIntakeHandler)
+app.post('/addFoodIntake',checkAuthentication,addFoodIntakeHandler)
 app.post('/getUserReviews',checkAuthentication,getUserReviewsHandler)
 app.post('/getUserRatings',checkAuthentication,getUserRatingsHandler)
 app.post('/getUserRecipeIntake',checkAuthentication,getUserRecipeIntakeHandler)
+app.post('/getUserFoodIntake',checkAuthentication,getUserFoodIntakeHandler)
 
 
 
