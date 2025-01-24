@@ -10,7 +10,7 @@ userId: string;
 };
   
 export const createAuthTokens = (
-    user: {id:number,refreshTokenVersion:number}
+    user: {id:string,refreshTokenVersion:number}
   ): { refreshToken: string; accessToken: string } => {
     const refreshToken = jwt.sign(
       { userId: user.id, refreshTokenVersion: user.refreshTokenVersion },
@@ -59,7 +59,7 @@ export const checkRefreshToken=async (refreshToken:string)=>{
     }
 
     // 2. get user
-    let user = await retrieveUser(Number(data.userId))
+    let user = await retrieveUser(data.userId)
     user=user[0][0]
     // 3.check refresh token version
     if (!user || user.refreshTokenVersion !== data.refreshTokenVersion) {
