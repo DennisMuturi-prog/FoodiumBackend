@@ -1,6 +1,6 @@
-// @deno-types="npm:@types/passport@1.0.17"
+// @deno-types="npm:@types/passport@^1.0.17"
 import passport from 'passport'
-// @deno-types="npm:@types/passport-google-oauth20@2.0.16"
+// @deno-types="npm:@types/passport-google-oauth20@^2.0.16"
 import  {Strategy as GoogleStrategy} from 'passport-google-oauth20'
 import { registerOauthUser } from "../sqlDB/mysqlDB.ts";
 
